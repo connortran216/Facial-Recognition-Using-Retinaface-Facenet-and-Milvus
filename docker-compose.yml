@@ -1,0 +1,45 @@
+version: '2.0'
+services:
+    core:
+        build:
+            context: ./core
+        ports:
+            - '8000:8000'
+        volumes:
+            - ./core:/home/jovyan
+        links:
+            - milvus
+        networks:
+            test_network:
+                aliases:
+                    - core
+    api_gateway:
+        build:
+            context: ./api_gateway
+        ports:
+            - '8888:8888'
+        volumes:
+            - ./api_gateway:/home/jovyan
+        links:
+            - core
+        networks:
+            test_network:
+                aliases:
+                    - api_gateway
+    milvus:
+        image: milvusdb/milvus:0.10.4-cpu-d120220-e72454 #milvusdb/milvus:0.9.1-cpu-d052920-e04ed5
+        ports:
+            - '19530:19530'
+            - '19121:19121'
+        volumes:
+            - ./milvus/db:/var/lib/milvus/db
+            - ./milvus/conf:/var/lib/milvus/conf
+            - ./milvus/logs:/var/lib/milvus/logs
+            - ./milvus/wal:/var/lib/milvus/wal
+        networks:
+            test_network:
+                aliases:
+                    - milvus 
+networks:
+    test_network:
+        external: true
